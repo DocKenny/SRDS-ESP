@@ -2,6 +2,8 @@
 #include <WiFi.h>
 #include <PubSubClient.h>
 
+#include "../include/config.h"
+
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(115200);
