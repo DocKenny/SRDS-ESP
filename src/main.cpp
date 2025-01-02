@@ -15,7 +15,9 @@ MQTTPubSubClient mqtt;
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(115200);
+  wifiClient.connect(MQTT_SERVER, MQTT_PORT);
   connectToWifi();
+  mqtt.begin(wifiClient);
   connectToMqtt();
 
 }
@@ -23,14 +25,7 @@ void setup() {
 
 void loop() {
   // put your main code here, to run repeatedly:
-  Serial.println("Hello World!");
-
-  wifiClient.connect(MQTT_SERVER, MQTT_PORT);
-
-  mqtt.begin(wifiClient);
-
-  connectToMqtt();
-
+  mqtt.update();
 }
 
 void MQTTcallback(char* topic, byte* payload, unsigned int length) {
