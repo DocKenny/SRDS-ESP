@@ -16,14 +16,20 @@ void setup() {
   // put your setup code here, to run once:
   Serial.begin(115200);
   connectToWifi();
-
   connectToMqtt();
 
 }
 
+
 void loop() {
   // put your main code here, to run repeatedly:
   Serial.println("Hello World!");
+
+  wifiClient.connect(MQTT_SERVER, MQTT_PORT);
+
+  mqtt.begin(wifiClient);
+
+  connectToMqtt();
 
 }
 
@@ -45,4 +51,13 @@ void connectToWifi() {
     Serial.print(".");
   }
   Serial.println("Connected to WiFi");
+}
+
+void connectToMQTT() {
+    Serial.print("Connecting to MQTT...");
+    while (!mqtt.connect("esp32")) {  // Use a client ID here
+        Serial.print(".");
+        delay(1000);
+    }
+    Serial.println(" connected!");
 }
