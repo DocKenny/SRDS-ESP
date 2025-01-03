@@ -6,7 +6,7 @@
 
 void MQTTcallback(char* topic, byte* payload, unsigned int length);
 void connectToWifi();
-void connectToMqtt();
+void connectToMQTT();
 
 WiFiClient wifiClient;
 MQTTPubSubClient mqtt;
@@ -18,7 +18,7 @@ void setup() {
   wifiClient.connect(MQTT_SERVER, MQTT_PORT);
   connectToWifi();
   mqtt.begin(wifiClient);
-  connectToMqtt();
+  connectToMQTT();
 
 }
 
@@ -26,6 +26,7 @@ void setup() {
 void loop() {
   // put your main code here, to run repeatedly:
   mqtt.update();
+  Serial.println("loop");
 }
 
 void MQTTcallback(char* topic, byte* payload, unsigned int length) {
