@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include <WiFi.h>
 #include <MQTTPubSubClient.h>
+#include <HardwareSerial.h>
 
 #include "../include/config.h"
 
@@ -10,23 +11,45 @@ void connectToMQTT();
 
 WiFiClient wifiClient;
 MQTTPubSubClient mqtt;
+HardwareSerial mySerial(1);
 
+#define RX_PIN 16  // GPIO16 for RX
+#define TX_PIN 17  // GPIO17 for TX
 
 void setup() {
-  // put your setup code here, to run once:
   Serial.begin(115200);
-  wifiClient.connect(MQTT_SERVER, MQTT_PORT);
+  mySerial.begin(9600, SERIAL_8N1, RX_PIN, TX_PIN);
   connectToWifi();
+
+  wifiClient.connect(MQTT_SERVER, MQTT_PORT);
+
   mqtt.begin(wifiClient);
+
   connectToMQTT();
 
+  mqtt.subscribe([](const String& topic, const String& payload, const size_t size) {
+        mySerial.println("mqtt received: " + topic + " - " + payload);
+    });
+
+  mqtt.publish("esp32", "Hello from ESP32");
 }
 
-
 void loop() {
-  // put your main code here, to run repeatedly:
+  if (WiFi.status() != WL_CONNECTED) {
+    connectToWifi();
+  }
+
+  if (!mqtt.isConnected()) {
+    connectToMQTT();
+  }
+
   mqtt.update();
-  Serial.println("loop");
+  mySerial.println("loop");
+
+  if(Serial.available()) {
+    String message = mySerial.readString();
+    mqtt.publish("esp32", message);
+  }
 }
 
 void MQTTcallback(char* topic, byte* payload, unsigned int length) {
@@ -40,19 +63,19 @@ void MQTTcallback(char* topic, byte* payload, unsigned int length) {
 }
 
 void connectToWifi() {
-  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
-  Serial.print("Connecting to WiFi");
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(".");
-  }
-  Serial.println("Connected to WiFi");
+    Serial.print("Connecting to WiFi...");
+    WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+    while (WiFi.status() != WL_CONNECTED) {
+        Serial.print(".");
+        delay(1000);
+    }
+    Serial.println(" connected!");
 }
 
 void connectToMQTT() {
     Serial.print("Connecting to MQTT...");
     while (!mqtt.connect("esp32")) {  // Use a client ID here
-        Serial.print(".");
+        Serial.print(".,");
         delay(1000);
     }
     Serial.println(" connected!");
