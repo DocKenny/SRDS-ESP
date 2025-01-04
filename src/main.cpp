@@ -13,8 +13,8 @@ WiFiClient wifiClient;
 MQTTPubSubClient mqtt;
 HardwareSerial mySerial(1);
 
-#define RX_PIN 16  // GPIO16 for RX
-#define TX_PIN 17  // GPIO17 for TX
+#define RX_PIN 16 
+#define TX_PIN 17  
 
 void setup() {
   Serial.begin(115200);
